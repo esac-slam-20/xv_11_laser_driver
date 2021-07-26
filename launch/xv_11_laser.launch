@@ -1,0 +1,8 @@
+<launch>
+    <node name="neato_laser_publisher" pkg="xv_11_laser_driver" type="neato_laser_publisher" output="screen">
+        <param name="port" type="string" value="/dev/ttyUSB0" />
+        <param name="frame_id" type="string" value="laser" />
+        <param name="scan_topic" type="string" value="scan" />
+        <param name="rpm_topic" type="string" value="rpms" />
+    </node>
+</launch>

@@ -44,24 +44,20 @@ int main(int argc, char **argv)
   ros::NodeHandle n;
   ros::NodeHandle priv_nh("~");
 
-  std::string port;
-  int baud_rate;
-  std::string frame_id;
-  int firmware_number;
+  std::string port = priv_nh.param<std::string>("port", "/dev/ttyUSB0");
+  int baud_rate = priv_nh.param<int>("baud_rate", 115200);
+  std::string frame_id = priv_nh.param<std::string>("frame_id", "neato_laser");
+  std::string scan_topic = priv_nh.param<std::string>("scan_topic", "scan");
+  std::string rpm_topic = priv_nh.param<std::string>("rpm_topic", "rpms");
 
   std_msgs::UInt16 rpms;
-
-  priv_nh.param("port", port, std::string("/dev/ttyUSB0"));
-  priv_nh.param("baud_rate", baud_rate, 115200);
-  priv_nh.param("frame_id", frame_id, std::string("neato_laser"));
-
   boost::asio::io_service io;
 
   try
   {
     xv_11_laser_driver::XV11Laser laser(port, baud_rate, io);
-    ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("scan", 1000);
-    ros::Publisher motor_pub = n.advertise<std_msgs::UInt16>("rpms", 1000);
+    ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>(scan_topic, 1000);
+    ros::Publisher motor_pub = n.advertise<std_msgs::UInt16>(rpm_topic, 1000);
 
     while (ros::ok())
     {
@@ -71,7 +67,7 @@ int main(int argc, char **argv)
       laser.poll(scan);
       rpms.data = laser.rpms;
       laser_pub.publish(scan);
-      motor_pub.publish(rpms);
+      motor_pub.publish(std_msgs::UInt16(rpms));
     }
     laser.close();
     return 0;
